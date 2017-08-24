@@ -200,6 +200,8 @@ public class Scanner implements Lexer {
      * @param input the input, might be modified
      * @param inputLength the size of the input.
      * Must be positive and less than or equal to input.length.
+     * 保证inputLength小于input数组长度，并在最后添加EOI(End of input character)
+     * 全局变量buf保存代码；buflen保存长度；bp作为访问数组标志位
      */
     protected Scanner(Factory fac, char[] input, int inputLength) {
         this(fac);
@@ -282,6 +284,7 @@ public class Scanner implements Lexer {
     }
 
     /** Read next character.
+     * 全局变量ch表示当前读到的字符
      */
     private void scanChar() {
         ch = buf[++bp];
@@ -510,6 +513,7 @@ public class Scanner implements Lexer {
     }
 
     /** Read an identifier.
+     * 读取标识符
      */
     private void scanIdent() {
         boolean isJavaIdentifierPart;
@@ -517,7 +521,7 @@ public class Scanner implements Lexer {
         do {
             if (sp == sbuf.length) putChar(ch); else sbuf[sp++] = ch;
             // optimization, was: putChar(ch);
-
+            
             scanChar();
             switch (ch) {
             case 'A': case 'B': case 'C': case 'D': case 'E':
@@ -745,6 +749,7 @@ public class Scanner implements Lexer {
     }
 
     /** Read token.
+     *  nextToken()执行后修改全局变量token
      */
     public void nextToken() {
 
@@ -790,6 +795,7 @@ public class Scanner implements Lexer {
                 case 'u': case 'v': case 'w': case 'x': case 'y':
                 case 'z':
                 case '$': case '_':
+                	//标识符
                     scanIdent();
                     return;
                 case '0':
@@ -797,25 +803,30 @@ public class Scanner implements Lexer {
                     if (ch == 'x' || ch == 'X') {
                         scanChar();
                         if (ch == '.') {
+                        	//扫描十六进制分数和后缀
                             scanHexFractionAndSuffix(false);
                         } else if (digit(16) < 0) {
                             lexError("invalid.hex.number");
                         } else {
+                        	//16进制
                             scanNumber(16);
                         }
                     } else {
                         putChar('0');
+                        //8进制
                         scanNumber(8);
                     }
                     return;
                 case '1': case '2': case '3': case '4':
                 case '5': case '6': case '7': case '8': case '9':
+                	//10进制数
                     scanNumber(10);
                     return;
                 case '.':
                     scanChar();
                     if ('0' <= ch && ch <= '9') {
                         putChar('.');
+                        //扫描小数和后缀
                         scanFractionAndSuffix();
                     } else if (ch == '.') {
                         putChar('.'); putChar('.');
@@ -823,11 +834,13 @@ public class Scanner implements Lexer {
                         if (ch == '.') {
                             scanChar();
                             putChar('.');
+                            //... 省略号
                             token = ELLIPSIS;
                         } else {
                             lexError("malformed.fp.lit");
                         }
                     } else {
+                    	// 点
                         token = DOT;
                     }
                     return;
@@ -850,6 +863,7 @@ public class Scanner implements Lexer {
                 case '/':
                     scanChar();
                     if (ch == '/') {
+                    	//处理“//”注释
                         do {
                             scanCommentChar();
                         } while (ch != CR && ch != LF && bp < buflen);
@@ -859,6 +873,7 @@ public class Scanner implements Lexer {
                         }
                         break;
                     } else if (ch == '*') {
+                    	//处理“/**/”
                         scanChar();
                         CommentStyle style;
                         if (ch == '*') {
@@ -885,15 +900,18 @@ public class Scanner implements Lexer {
                             return;
                         }
                     } else if (ch == '=') {
+                    	//处理“/=”除等
                         name = names.slashequals;
                         token = SLASHEQ;
                         scanChar();
                     } else {
+                    	//处理为“/”除法
                         name = names.slash;
                         token = SLASH;
                     }
                     return;
                 case '\'':
+                	//处理单引号''char
                     scanChar();
                     if (ch == '\'') {
                         lexError("empty.char.lit");
@@ -910,6 +928,7 @@ public class Scanner implements Lexer {
                     }
                     return;
                 case '\"':
+                	//处理双引号""String
                     scanChar();
                     while (ch != '\"' && ch != CR && ch != LF && bp < buflen)
                         scanLitChar();
@@ -922,8 +941,10 @@ public class Scanner implements Lexer {
                     return;
                 default:
                     if (isSpecial(ch)) {
+                    	//处理运算符号
                         scanOperator();
                     } else {
+                    	//其他符号，如0x1a EOI
                         boolean isJavaIdentifierStart;
                         if (ch < '\u0080') {
                             // all ASCII range chars already handled, above

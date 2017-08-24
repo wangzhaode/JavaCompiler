@@ -577,8 +577,11 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 taskListener.started(e);
             }
             int initialErrorCount = log.nerrors;
+            //扫描类Scanner，扫描源代码文件产生Token
             Scanner scanner = getScannerFactory().newScanner(content);
+            //类Parser初始化
             Parser parser = parserFactory.newParser(scanner, keepComments(), genEndPos);
+            //编译单元compilationUnit
             tree = parser.compilationUnit();
             log.unrecoverableError |= (log.nerrors > initialErrorCount);
             if (lineDebugInfo) {

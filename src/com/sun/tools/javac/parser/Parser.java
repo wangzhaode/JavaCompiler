@@ -436,6 +436,7 @@ public class Parser {
      * Ident = IDENTIFIER
      */
     Name ident() {
+    	System.out.println(S.token()+"-->"+S.name().toString());
         if (S.token() == IDENTIFIER) {
             Name name = S.name();
             S.nextToken();
@@ -2146,7 +2147,10 @@ public class Parser {
             accept(SEMI);
         }
         ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
-       boolean checkForImports = true;
+        boolean checkForImports = true;
+        
+        System.out.println(S.token()+" "+S.name().toString());
+        
         while (S.token() != EOF) {
             if (S.pos() <= errorEndPos) {
                 // error recovery
@@ -2187,6 +2191,9 @@ public class Parser {
         }
         JCExpression pid = toP(F.at(S.pos()).Ident(ident()));
         do {
+            
+        	System.out.println(S.token()+" "+S.name().toString());
+        	
             int pos1 = S.pos();
             accept(DOT);
             if (S.token() == STAR) {
