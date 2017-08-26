@@ -2133,10 +2133,14 @@ public class Parser {
         String dc = S.docComment();
         JCModifiers mods = null;
         List<JCAnnotation> packageAnnotations = List.nil();
-        if (S.token() == MONKEYS_AT)
-            mods = modifiersOpt();
-
+        //处理 @
+        if (S.token() == MONKEYS_AT) {
+        	System.out.println("处理@");
+        	mods = modifiersOpt();
+        }
+        //处理 package
         if (S.token() == PACKAGE) {
+        	System.out.println("处理package");
             if (mods != null) {
                 checkNoMods(mods.flags);
                 packageAnnotations = mods.annotations;
@@ -2148,9 +2152,7 @@ public class Parser {
         }
         ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
         boolean checkForImports = true;
-        
-        System.out.println(S.token()+" "+S.name().toString());
-        
+               
         while (S.token() != EOF) {
             if (S.pos() <= errorEndPos) {
                 // error recovery
@@ -2159,8 +2161,12 @@ public class Parser {
                     break;
             }
             if (checkForImports && mods == null && S.token() == IMPORT) {
+            	//处理 import
+            	System.out.println("处理import");
                 defs.append(importDeclaration());
             } else {
+            	//处理类型声明
+            	System.out.println("处理类型声明");
                 JCTree def = typeDeclaration(mods);
                 if (def instanceof JCExpressionStatement)
                     def = ((JCExpressionStatement)def).expr;
@@ -2190,10 +2196,8 @@ public class Parser {
             S.nextToken();
         }
         JCExpression pid = toP(F.at(S.pos()).Ident(ident()));
-        do {
-            
-        	System.out.println(S.token()+" "+S.name().toString());
-        	
+        do {          
+        	System.out.println(S.token()+" "+S.name().toString());      	
             int pos1 = S.pos();
             accept(DOT);
             if (S.token() == STAR) {
@@ -2210,6 +2214,7 @@ public class Parser {
 
     /** TypeDeclaration = ClassOrInterfaceOrEnumDeclaration
      *                  | ";"
+     *  Class Interface 或者Enum 的声明 或者 ;
      */
     JCTree typeDeclaration(JCModifiers mods) {
         int pos = S.pos();
@@ -2228,6 +2233,7 @@ public class Parser {
      *  @param dc       The documentation comment for the class, or null.
      */
     JCStatement classOrInterfaceOrEnumDeclaration(JCModifiers mods, String dc) {
+    	System.out.println("DEBUG >> 处理class Interface或Enum声明");
         if (S.token() == CLASS) {
             return classDeclaration(mods, dc);
         } else if (S.token() == INTERFACE) {
@@ -2275,6 +2281,7 @@ public class Parser {
      *  @param dc       The documentation comment for the class, or null.
      */
     JCClassDecl classDeclaration(JCModifiers mods, String dc) {
+    	System.out.println("DEBUG >> 处理class声明");
         int pos = S.pos();
         accept(CLASS);
         Name name = ident();
@@ -2437,6 +2444,7 @@ public class Parser {
      *  InterfaceBody = "{" {InterfaceBodyDeclaration} "}"
      */
     List<JCTree> classOrInterfaceBody(Name className, boolean isInterface) {
+    	System.out.println("DEBUG >> 处理class或者interface结构内容");
         accept(LBRACE);
         if (S.pos() <= errorEndPos) {
             // error recovery
@@ -2474,6 +2482,7 @@ public class Parser {
      *      ( ConstantDeclaratorsRest | InterfaceMethodDeclaratorRest ";" )
      */
     List<JCTree> classOrInterfaceBodyDeclaration(Name className, boolean isInterface) {
+    	System.out.println("DEBUG >> 处理class或者interface内容声明");
         if (S.token() == SEMI) {
             S.nextToken();
             return List.<JCTree>of(F.at(Position.NOPOS).Block(0, List.<JCStatement>nil()));
