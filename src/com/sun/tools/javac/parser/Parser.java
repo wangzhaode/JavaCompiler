@@ -1184,6 +1184,7 @@ public class Parser {
     }
 
     JCMethodInvocation arguments(List<JCExpression> typeArgs, JCExpression t) {
+    	System.out.println("DEBUG >> 处理参数");
         int pos = S.pos();
         List<JCExpression> args = arguments();
         return toP(F.at(pos).Apply(typeArgs, t, args));
@@ -1494,6 +1495,7 @@ public class Parser {
     /** Block = "{" BlockStatements "}"
      */
     JCBlock block(int pos, long flags) {
+    	System.out.println("DEBUG >> 处理类内代码块内容");
         accept(LBRACE);
         List<JCStatement> stats = blockStatements();
         JCBlock t = F.at(pos).Block(flags, stats);
@@ -1636,6 +1638,7 @@ public class Parser {
      */
     @SuppressWarnings("fallthrough")
     public JCStatement statement() {
+    	System.out.println("DEBUG >> 处理声明");
         int pos = S.pos();
         switch (S.token()) {
         case LBRACE:
@@ -2569,6 +2572,7 @@ public class Parser {
                               List<JCTypeParameter> typarams,
                               boolean isInterface, boolean isVoid,
                               String dc) {
+    	System.out.println("其他方法声明");
         List<JCVariableDecl> params = formalParameters();
         if (!isVoid) type = bracketsOpt(type);
         List<JCExpression> thrown = List.nil();
