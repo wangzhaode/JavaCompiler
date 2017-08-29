@@ -805,7 +805,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 processAnnotations(
                     enterTrees(stopIfError(CompileState.PARSE, parseFiles(sourceFileObjects))),
                     classnames);
-            
+            System.out.println("DEBUG >> compiler2");
             //分析生成字节码
             delegateCompiler.compile2();
             delegateCompiler.close();

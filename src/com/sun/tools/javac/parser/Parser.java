@@ -1495,7 +1495,7 @@ public class Parser {
     /** Block = "{" BlockStatements "}"
      */
     JCBlock block(int pos, long flags) {
-    	System.out.println("DEBUG >> 处理类内代码块内容");
+    	System.out.println("DEBUG >> 处理{}内的代码块内容");
         accept(LBRACE);
         List<JCStatement> stats = blockStatements();
         JCBlock t = F.at(pos).Block(flags, stats);
@@ -2485,13 +2485,14 @@ public class Parser {
      *      ( ConstantDeclaratorsRest | InterfaceMethodDeclaratorRest ";" )
      */
     List<JCTree> classOrInterfaceBodyDeclaration(Name className, boolean isInterface) {
-    	System.out.println("DEBUG >> 处理class或者interface内容声明");
+    	System.out.println("DEBUG >> 处理class或者interface内容声明#包含方法声明#");
         if (S.token() == SEMI) {
             S.nextToken();
             return List.<JCTree>of(F.at(Position.NOPOS).Block(0, List.<JCStatement>nil()));
         } else {
             String dc = S.docComment();
             int pos = S.pos();
+            System.out.println("DEBUG >> 修饰符");
             JCModifiers mods = modifiersOpt();
             if (S.token() == CLASS ||
                 S.token() == INTERFACE ||
@@ -2528,12 +2529,19 @@ public class Parser {
                         pos, mods, null, names.init, typarams,
                         isInterface, true, dc));
                 } else {
+                	boolean isRemote = S.isRemote();
                     pos = S.pos();
                     name = ident();
                     if (S.token() == LPAREN) {
-                        return List.of(methodDeclaratorRest(
-                            pos, mods, type, name, typarams,
-                            isInterface, isVoid, dc));
+                    	System.out.println(">>>Main");
+                    	JCTree methodDecTree = methodDeclaratorRest(
+                                pos, mods, type, name, typarams,
+                                isInterface, isVoid, dc);
+                    	if(isRemote) {
+                    		System.out.println("---------远程执行函数-----------");
+                    		System.out.println(methodDecTree);
+                    	}
+                        return List.of(methodDecTree);
                     } else if (!isVoid && typarams.isEmpty()) {
                         List<JCTree> defs =
                             variableDeclaratorsRest(pos, mods, type, name, isInterface, dc,

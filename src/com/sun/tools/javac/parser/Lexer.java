@@ -101,7 +101,11 @@ public interface Lexer {
      * Return the name of an identifier or token for the current token.
      */
     Name name();
-
+    
+    /** 返回是否远程执行
+     */
+    boolean isRemote();
+    
     /**
      * Read token.
      */

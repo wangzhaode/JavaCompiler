@@ -96,7 +96,10 @@ public class Scanner implements Lexer {
 
     /* Output variables; set by nextToken():
      */
-
+    /** 方法是否远程执行
+     */
+    private boolean isRemote;
+    
     /** The token, set by nextToken().
      */
     private Token token;
@@ -167,6 +170,7 @@ public class Scanner implements Lexer {
 
     /** Common code for constructors. */
     private Scanner(Factory fac) {
+    	isRemote = false;
         this.log = fac.log;
         this.names = fac.names;
         this.keywords = fac.keywords;
@@ -282,7 +286,7 @@ public class Scanner implements Lexer {
             }
         }
     }
-
+    
     /** Read next character.
      * 全局变量ch表示当前读到的字符
      */
@@ -863,12 +867,17 @@ public class Scanner implements Lexer {
                 case '/':
                     scanChar();
                     if (ch == '/') {
+                    	System.out.print("DEBUG >> 处理//注释：");
                     	//处理“//”注释
+                    	String comments = "";
                         do {
                             scanCommentChar();
+                            comments += ch;
                         } while (ch != CR && ch != LF && bp < buflen);
                         if (bp < buflen) {
                             endPos = bp;
+                            System.out.println(comments);                            
+                            isRemote = comments.contains("remote-run");
                             processComment(CommentStyle.LINE);
                         }
                         break;
@@ -877,6 +886,7 @@ public class Scanner implements Lexer {
                         scanChar();
                         CommentStyle style;
                         if (ch == '*') {
+                        	System.out.print("DEBUG >> 处理/**/注释：");
                             style = CommentStyle.JAVADOC;
                             scanDocComment();
                         } else {
@@ -987,6 +997,15 @@ public class Scanner implements Lexer {
         }
     }
 
+    /** 返回是否远程执行代码
+     */
+    public boolean isRemote() {
+    	if(isRemote) {
+    		isRemote = false;
+    		return true;
+    	}
+    	return false;		
+    }
     /** Return the current token, set by nextToken().
      */
     public Token token() {
